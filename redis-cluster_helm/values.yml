@@ -1,0 +1,45 @@
+auth:
+  enabled: true
+  password: "YOUR_STRONG_PASSWORD" 
+  
+cluster:
+  replicas: 3
+  
+replica:
+  replicaCount: 1
+
+master:
+  persistence:
+    enabled: true
+    size: 20Gi 
+    storageClass: "standard" 
+  
+  resources:
+    limits:
+      cpu: "1"
+      memory: "4Gi"
+    requests:
+      cpu: "0.5"
+      memory: "2Gi"
+      
+  configuration: |
+    maxmemory 3gb 
+    maxmemory-policy allkeys-lru
+    appendonly yes 
+    appendfsync everysec
+
+replica:
+  persistence:
+    enabled: true
+    size: 20Gi
+    storageClass: "standard" 
+  resources:
+    limits:
+      cpu: "0.5"
+      memory: "2Gi"
+    requests:
+      cpu: "0.25"
+      memory: "1Gi"
+
+service:
+  type: ClusterIP
