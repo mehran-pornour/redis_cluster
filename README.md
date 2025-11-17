@@ -1,5 +1,8 @@
 # redis_cluster
-
+# redis cluster inFormation
+```bash
+        https://github.com/bitnami/containers/blob/main/bitnami/redis-cluster/README.md
+```
 ## Docker file 
 ```bash
     FROM redis:7.2
