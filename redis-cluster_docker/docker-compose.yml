@@ -1,0 +1,42 @@
+version: '3.7'
+
+services:
+  redis-0: &redis-config
+    build: .
+    container_name: redis-0
+    volumes:
+      - ./data/redis-0:/data 
+    ports:
+      - "7000:6379" 
+      - "17000:16379" 
+    networks:
+      - redis-network
+    restart: always
+
+  redis-1:
+    <<: *redis-config
+    container_name: redis-1
+    ports:
+      - "7001:6379"
+      - "17001:16379"
+    volumes:
+      - ./data/redis-1:/data
+
+  redis-2:
+    <<: *redis-config
+    container_name: redis-2
+    ports:
+      - "7002:6379"
+      - "17002:16379"
+    volumes:
+      - ./data/redis-2:/data
+
+  stress-client:
+    image: redis:7-alpine
+    command: ["tail", "-f", "/dev/null"] 
+    networks:
+      - redis-network
+
+networks:
+  redis-network:
+    driver: bridge
