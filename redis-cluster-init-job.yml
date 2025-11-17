@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: redis-cluster-init
+  namespace: default
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: redis-cluster-creator
+        image: redis:7-alpine
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Waiting for all 6 redis pods to be ready..."
+            sleep 30 
+            
+            redis-cli --cluster create \
+            redis-cluster-0.redis-cluster-headless.default.svc.cluster.local:6379 \
+            redis-cluster-1.redis-cluster-headless.default.svc.cluster.local:6379 \
+            redis-cluster-2.redis-cluster-headless.default.svc.cluster.local:6379 \
+            redis-cluster-3.redis-cluster-headless.default.svc.cluster.local:6379 \
+            redis-cluster-4.redis-cluster-headless.default.svc.cluster.local:6379 \
+            redis-cluster-5.redis-cluster-headless.default.svc.cluster.local:6379 \
+            --cluster-replicas 1 \
+            --cluster-yes
+      nodeSelector:
+        kubernetes.io/os: linux

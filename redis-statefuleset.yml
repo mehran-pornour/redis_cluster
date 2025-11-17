@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-cluster
+  namespace: default
+spec:
+  replicas: 6 
+  selector:
+    matchLabels:
+      app: redis-cluster
+  serviceName: redis-cluster-headless 
+  template:
+    metadata:
+      labels:
+        app: redis-cluster
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine 
+        ports:
+        - containerPort: 6379
+          name: client
+        - containerPort: 16379
+          name: cluster-bus
+        
+        command: ["redis-server"]
+        args: ["/redis-conf/redis.conf"]
+        
+        livenessProbe:
+          exec:
+            command: ["redis-cli", "-h", "localhost", "ping"]
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          exec:
+            command: ["redis-cli", "-h", "localhost", "cluster", "info"]
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          
+        resources:
+          limits:
+            cpu: "1"
+            memory: "4Gi"
+          requests:
+            cpu: "0.5"
+            memory: "2Gi"
+
+        volumeMounts:
+        - name: redis-conf
+          mountPath: /redis-conf
+        - name: redis-data
+          mountPath: /data 
+          
+      volumes:
+      - name: redis-conf
+        configMap:
+          name: redis-cluster-config
+
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: standard 
+      resources:
+        requests:
+          size: 10Gi 
